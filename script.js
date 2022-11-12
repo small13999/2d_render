@@ -117,6 +117,23 @@ const img1 = {
     img: new Image()
 }
 img1.img.src = "tree.png"
+const grass = new Image();
+const stone = new Image();
+grass.src = "grass.png";
+stone.src = "stone.png";
+
+const tiles = [
+    [0,0,0,0,1,0,0,0,0,0],
+    [0,1,1,0,1,0,0,0,0,0],
+    [0,1,1,0,1,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0],
+    [1,1,1,1,1,1,1,1,1,1],
+    [0,0,0,0,1,0,0,1,0,0],
+    [0,0,0,0,1,0,0,1,0,0],
+    [0,0,0,0,1,0,0,1,0,0],
+    [0,0,0,0,1,0,0,1,0,0],
+    [0,0,0,0,1,0,0,1,0,0],
+]
 
 const rects = [
     rect1, rect2, rect3, rect4, img1
@@ -126,22 +143,31 @@ function update() {
     moveCamera();
 }
 
+let tileSize = 256;
+
 function draw() {
     update();
     ctx.fillStyle = "green";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.arc(canvas.width/2, canvas.height/2, 50*camera.zoom, 0, 6.28);
-    ctx.fill();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(camera.rotation*Math.PI/180);
+    ctx.translate(-(canvas.width/2), -(canvas.height/2));
 
+    for (let i = 0; i<tiles.length; i++) {
+        for (let j = 0; j<tiles[0].length; j++) {
+            let rX = i*tileSize-camera.x;
+            let rY = j*tileSize-camera.y;
+            if (tiles[i][j] == 0) {
+                ctx.drawImage(grass, rX - (canvas.width/2 - rX)*(camera.zoom-1), rY - (canvas.width/2 - rY)*(camera.zoom-1), tileSize*camera.zoom, tileSize*camera.zoom);
+            } else {
+                ctx.drawImage(stone, rX - (canvas.width/2 - rX)*(camera.zoom-1), rY - (canvas.width/2 - rY)*(camera.zoom-1), tileSize*camera.zoom, tileSize*camera.zoom);
+            }
+        }
+    }
+
+    ctx.fillStyle = "blue";
     rects.forEach(rect => {
-        ctx.translate(canvas.width/2, canvas.height/2);
-        ctx.rotate(camera.rotation*Math.PI/180);
-        ctx.translate(-(canvas.width/2), -(canvas.height/2));
-
-        ctx.fillStyle = "blue";
         let rX = rect.x-camera.x;
         let rY = rect.y-camera.y;
         if (rect.img != undefined) {
@@ -149,9 +175,13 @@ function draw() {
         } else {
             ctx.fillRect(rX - (canvas.width/2 - rX)*(camera.zoom-1), rY - (canvas.width/2 - rY)*(camera.zoom-1), 50*camera.zoom, 50*camera.zoom);
         }
-
-        ctx.resetTransform();
     });
+    ctx.resetTransform();
+
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2, 50*camera.zoom, 0, 6.28);
+    ctx.fill();
 
     requestAnimationFrame(draw);
 }
